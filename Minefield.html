@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MINEFIELD — drinking game</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Stencil+Display:wght@700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    background: #050504;
+    font-family: 'Space Mono', ui-monospace, monospace;
+    color: #f4ede0;
+    overflow: hidden;
+  }
+  #root {
+    width: 100%; height: 100%;
+  }
+  @keyframes mfPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.4); }
+  }
+  @keyframes mfPop {
+    from { transform: scale(0.92); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+  }
+  @keyframes mfFlip {
+    0%   { transform: rotateY(0deg)   scale(1); }
+    50%  { transform: rotateY(180deg) scale(1.1); }
+    100% { transform: rotateY(360deg) scale(1); }
+  }
+  /* Hide scrollbars */
+  *::-webkit-scrollbar { display: none; }
+  input::placeholder { color: #6b6657; }
+
+  /* Subtle film grain background */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    pointer-events: none;
+    background-image:
+      radial-gradient(ellipse at top, rgba(245,208,0,0.04), transparent 60%),
+      radial-gradient(ellipse at bottom, rgba(255,58,45,0.05), transparent 60%);
+    z-index: 1;
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<!-- React + Babel -->
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<!-- Data -->
+<script src="prompts.js"></script>
+
+<!-- Components (order matters) -->
+<script type="text/babel" src="ios-frame.jsx"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="game.jsx"></script>
+<script type="text/babel" src="screens.jsx"></script>
+<script type="text/babel" src="armory.jsx"></script>
+<script type="text/babel" src="gamescreen.jsx"></script>
+<script type="text/babel" src="minigames.jsx"></script>
+
+<!-- Mount -->
+<script type="text/babel">
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+
+<template id="__bundler_thumbnail" data-bg-color="#0b0a08">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <rect width="1200" height="800" fill="#0b0a08"/>
+    <g transform="translate(360, 200)">
+      <rect x="0" y="0" width="480" height="80" fill="#f5d000"/>
+      <text x="240" y="60" font-family="Impact, sans-serif" font-weight="900" font-size="64"
+            text-anchor="middle" fill="#0b0a08" letter-spacing="2">MINE</text>
+      <rect x="0" y="200" width="480" height="80" fill="#ff3a2d"/>
+      <text x="240" y="260" font-family="Impact, sans-serif" font-weight="900" font-size="64"
+            text-anchor="middle" fill="#0b0a08" letter-spacing="2">FIELD</text>
+      <circle cx="240" cy="140" r="22" fill="#0b0a08" stroke="#f5d000" stroke-width="4"/>
+      <circle cx="240" cy="140" r="6" fill="#f5d000"/>
+    </g>
+  </svg>
+</template>
+</body>
+</html>
