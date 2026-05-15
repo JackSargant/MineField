@@ -7,7 +7,7 @@ function IntroScreen({ onStart, onArmory }) {
 
   return (
     <div style={{
-      position: 'absolute', inset: 0, paddingTop: 64,
+      position: 'absolute', inset: 0, paddingTop: 'calc(env(safe-area-inset-top, 0px) + 16px)',
       display: 'flex', flexDirection: 'column', alignItems: 'stretch',
       background: `
         radial-gradient(ellipse 60% 40% at 50% 20%, rgba(245,208,0,0.06), transparent 70%),
@@ -33,13 +33,13 @@ function IntroScreen({ onStart, onArmory }) {
       <HazardStripes height={10} style={{ marginTop: 14 }} />
 
       {/* Logo block */}
-      <div style={{ padding: '40px 24px 0', position: 'relative' }}>
+      <div style={{ padding: '32px 24px 0', position: 'relative' }}>
         <div style={{ fontFamily: FONT_MONO, fontSize: 11, color: C.danger, letterSpacing: 3, marginBottom: 8 }}>
           ⚠ HOSTILE TERRAIN
         </div>
         <h1 style={{
           fontFamily: FONT_DISPLAY, fontWeight: 900,
-          fontSize: 86, lineHeight: 0.85, letterSpacing: -1,
+          fontSize: 104, lineHeight: 0.85, letterSpacing: -1,
           margin: 0, color: C.fg,
           textShadow: armed ? `4px 4px 0 ${C.danger}` : `0 0 0 ${C.danger}`,
           transition: 'text-shadow 400ms cubic-bezier(.2,.8,.2,1)',
@@ -47,8 +47,7 @@ function IntroScreen({ onStart, onArmory }) {
           MINE<br/>FIELD.
         </h1>
         <div style={{
-          marginTop: 16, fontFamily: FONT_MONO, fontSize: 12, color: C.dim, lineHeight: 1.6,
-          maxWidth: 280,
+          marginTop: 18, fontFamily: FONT_MONO, fontSize: 13, color: C.dim, lineHeight: 1.6,
         }}>
           A snake-path drinking game.<br/>
           Roll. Step. Pray.
@@ -71,7 +70,7 @@ function IntroScreen({ onStart, onArmory }) {
 
         <StencilButton onClick={onStart}>▶ DEPLOY</StencilButton>
         <button onClick={onArmory} style={{
-          marginTop: 10, width: '100%', padding: '12px',
+          marginTop: 10, width: '100%', padding: '14px',
           background: 'transparent', border: `1px solid ${C.line}`,
           color: C.dim, fontFamily: FONT_MONO, fontSize: 11, letterSpacing: 2,
           cursor: 'pointer', borderRadius: 4,
@@ -79,6 +78,7 @@ function IntroScreen({ onStart, onArmory }) {
         <div style={{
           marginTop: 14, textAlign: 'center', fontFamily: FONT_MONO,
           fontSize: 9, color: C.dim2, letterSpacing: 2,
+          paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 16px)',
         }}>
           DRINK RESPONSIBLY · KNOW YOUR LIMITS
         </div>
@@ -117,7 +117,7 @@ function SetupScreen({ initial, tweaks, setTweak, onBack, onStart }) {
   return (
     <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', background: C.bg }}>
       {/* header */}
-      <div style={{ padding: '64px 22px 0' }}>
+      <div style={{ padding: 'calc(env(safe-area-inset-top, 0px) + 20px) 22px 0' }}>
         <button onClick={onBack} style={{
           background: 'none', border: 'none', color: C.dim, fontFamily: FONT_MONO,
           fontSize: 11, letterSpacing: 2, padding: 0, cursor: 'pointer',
@@ -190,7 +190,7 @@ function SetupScreen({ initial, tweaks, setTweak, onBack, onStart }) {
       </div>
 
       {/* footer */}
-      <div style={{ padding: '14px 22px 28px', borderTop: `1px solid ${C.line}` }}>
+      <div style={{ padding: '14px 22px calc(env(safe-area-inset-bottom, 0px) + 20px)', borderTop: `1px solid ${C.line}` }}>
         <StencilButton
           disabled={players.length < 2}
           onClick={() => onStart(players)}
@@ -226,7 +226,7 @@ function WinScreen({ winner, players, onAgain, onHome }) {
     <div style={{
       position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
       background: `radial-gradient(ellipse 60% 40% at 50% 20%, ${winner.color}22, transparent 70%), ${C.bg}`,
-      paddingTop: 64,
+      paddingTop: 'calc(env(safe-area-inset-top, 0px) + 16px)',
     }}>
       <HazardStripes height={10} style={{ marginTop: 6 }} />
       <div style={{ flex: 1, padding: '40px 24px', display: 'flex', flexDirection: 'column' }}>
@@ -237,7 +237,7 @@ function WinScreen({ winner, players, onAgain, onHome }) {
           SURVIVOR
         </div>
         <h2 style={{
-          fontFamily: FONT_DISPLAY, fontWeight: 900, fontSize: 88, lineHeight: 0.85, margin: '8px 0 0',
+          fontFamily: FONT_DISPLAY, fontWeight: 900, fontSize: 108, lineHeight: 0.85, margin: '8px 0 0',
           color: winner.color, textShadow: `4px 4px 0 #000`,
           wordBreak: 'break-word',
         }}>{winner.name}</h2>
@@ -267,7 +267,7 @@ function WinScreen({ winner, players, onAgain, onHome }) {
           ))}
         </div>
       </div>
-      <div style={{ padding: '12px 22px 28px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div style={{ padding: '12px 22px calc(env(safe-area-inset-bottom, 0px) + 20px)', display: 'flex', flexDirection: 'column', gap: 10 }}>
         <StencilButton onClick={onAgain}>▶ RUN IT BACK</StencilButton>
         <StencilButton kind="ghost" onClick={onHome}>◂ HOME</StencilButton>
       </div>

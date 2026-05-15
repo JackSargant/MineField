@@ -121,7 +121,9 @@ function App() {
     <div style={{
       position: 'fixed', inset: 0, background: C.bg,
       color: C.fg, fontFamily: FONT_MONO, overflow: 'hidden',
+      display: 'flex', justifyContent: 'center',
     }}>
+      <div style={{ position: 'relative', width: '100%', maxWidth: 480, height: '100%', overflow: 'hidden' }}>
         {screen === 'intro' && <IntroScreen onStart={() => setScreen('setup')} onArmory={() => setScreen('armory')} />}
         {screen === 'armory' && (
           <ArmoryScreen prompts={prompts} setPrompts={setPrompts} onBack={() => setScreen('intro')} />
@@ -152,6 +154,7 @@ function App() {
             onHome={() => setScreen('intro')} />
         )}
       </div>
+    </div>
 
     <TweaksPanel title="Tweaks">
       <TweakSection label="Board" />

@@ -137,7 +137,7 @@ function GameScreen({ players, setPlayers, board, setBoard, turn, setTurn, cols,
 // ─── HEADER ────────────────────────────────────────────────────
 function GameHeader({ turn, players, onQuit }) {
   return (
-    <div style={{ paddingTop: 60 }}>
+    <div style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 8px)' }}>
       <div style={{
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         padding: '4px 18px',
@@ -183,9 +183,16 @@ function GameHeader({ turn, players, onQuit }) {
 
 // ─── BOARD ─────────────────────────────────────────────────────
 function Board({ board, players, cols, currentPlayerIdx }) {
-  // size cells to fit 402-14*2=374 width
+  const [viewW, setViewW] = useS2(() => Math.min(window.innerWidth, 480));
+  useE2(() => {
+    const onResize = () => setViewW(Math.min(window.innerWidth, 480));
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
+  // horizontal space consumed: GameScreen 14px/side + grid padding 8px/side = 44px total
   const cellGap = 6;
-  const usableW = 374 - 14 * 2;
+  const usableW = viewW - 44;
   const cellSize = Math.floor((usableW - cellGap * (cols - 1)) / cols);
 
   // Precompute tile positions
@@ -200,7 +207,7 @@ function Board({ board, players, cols, currentPlayerIdx }) {
   });
 
   return (
-    <div style={{ padding: '10px 14px 14px', position: 'relative' }}>
+    <div style={{ padding: '10px 0 14px', position: 'relative' }}>
       {/* coord readout */}
       <div style={{
         display: 'flex', justifyContent: 'space-between',
@@ -390,7 +397,7 @@ function BottomHUD({ current, dice, rolling, moving, onRoll }) {
     <div style={{
       borderTop: `1px solid ${C.line}`,
       background: `linear-gradient(180deg, ${C.bg}, ${C.bgDeep})`,
-      padding: '14px 18px 36px',
+      padding: '14px 18px calc(env(safe-area-inset-bottom, 0px) + 18px)',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
         {/* Whose turn */}
