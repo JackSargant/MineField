@@ -17,7 +17,13 @@ function loadPrompts() {
     const raw = localStorage.getItem(ARMORY_STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      // Merge with defaults so new categories aren't missing
+      const currentVersion = window.MINEFIELD_DEFAULT_PROMPTS._version || 1;
+      const storedVersion  = parsed._version || 1;
+      // Bust cache when prompts.js has been updated
+      if (storedVersion !== currentVersion) {
+        localStorage.removeItem(ARMORY_STORAGE_KEY);
+        return JSON.parse(JSON.stringify(window.MINEFIELD_DEFAULT_PROMPTS));
+      }
       const out = {};
       ARMORY_KINDS.forEach(({ key }) => {
         out[key] = Array.isArray(parsed[key]) ? parsed[key] : (window.MINEFIELD_DEFAULT_PROMPTS[key] || []);
@@ -29,8 +35,10 @@ function loadPrompts() {
 }
 
 function savePrompts(prompts) {
-  try { localStorage.setItem(ARMORY_STORAGE_KEY, JSON.stringify(prompts)); } catch (e) {}
-  // Keep the live pool in sync so gamescreen.jsx picks them up
+  try {
+    const version = window.MINEFIELD_DEFAULT_PROMPTS._version || 1;
+    localStorage.setItem(ARMORY_STORAGE_KEY, JSON.stringify({ ...prompts, _version: version }));
+  } catch (e) {}
   window.MINEFIELD_PROMPTS = prompts;
 }
 

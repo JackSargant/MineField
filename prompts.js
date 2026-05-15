@@ -1,6 +1,7 @@
 // Prompt tile pools for MINEFIELD — DEFAULTS (immutable bake-in)
 // Live pool lives at window.MINEFIELD_PROMPTS and is set by armory.jsx
 window.MINEFIELD_DEFAULT_PROMPTS = {
+ _version: 2,
  drink: [
   { title: "BOTTOMS UP",         body: "Take 3 sips and top yourself up." },
   { title: "ALL FOR ONE",        body: "...and one for all. Everyone takes 3 sips." },
