@@ -1,5 +1,169 @@
 // MINEFIELD — screens (intro, setup, win)
-const { useState: useS1, useEffect: useE1 } = React;
+const { useState: useS1, useEffect: useE1, useRef: useR1 } = React;
+
+// ── Pixel army-man defusing mines ────────────────────────────
+function MineDefuserAnimation() {
+  const canvasRef = useR1(null);
+
+  useE1(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const W = canvas.clientWidth  || 400;
+    const H = canvas.clientHeight || 640;
+    canvas.width  = W;
+    canvas.height = H;
+
+    const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingEnabled = false;
+
+    const P = 4; // css-px per sprite-pixel
+
+    const PAL = {
+      '.': null,
+      'H': '#2e4018', 'h': '#3c5420',  // helmet
+      'G': '#4a6825', 'g': '#3a5218',  // uniform
+      'F': '#c07848', 'E': '#0c0c08',  // skin / eye
+      'B': '#18180e',                  // boots
+      'Y': '#e8c000',                  // wire tool
+      'D': '#14140c', 'r': '#780a0a', 'R': '#aa1818', 'K': '#0a0a06', // mine
+    };
+
+    const draw = (rows, x, y) => {
+      rows.forEach((row, ry) => {
+        for (let rx = 0; rx < row.length; rx++) {
+          const col = PAL[row[rx]];
+          if (!col) continue;
+          ctx.fillStyle = col;
+          ctx.fillRect(Math.round(x + rx * P), Math.round(y + ry * P), P, P);
+        }
+      });
+    };
+
+    // ── Sprite definitions ────────────────────────────────
+    const WALK = [
+      [ '..HHH...', '.hHHHh..', '..HHH...', '..FFF...', '..FEF...',
+        'GGGGGGG.', '.GGGGG..', '.gGgGg..', '..G.G...', '.GG.G...', '.B..B...' ],
+      [ '..HHH...', '.hHHHh..', '..HHH...', '..FFF...', '..FEF...',
+        'GGGGGGG.', '.GGGGG..', '.gGgGg..', '..G.G...', '..G.GG..', '..B..B..' ],
+    ];
+    const STAND =
+      [ '..HHH...', '.hHHHh..', '..HHH...', '..FFF...', '..FEF...',
+        'GGGGGGG.', '.GGGGG..', '.gGgGg..', '..G.G...', '..G.G...', '..B.B...' ];
+    const CROUCH =
+      [ '....HHH.', '...hHHHh', '....HHH.', '.....FF.', '.....EF.',
+        '.GGGGGG.', 'gGGGGGg.', 'GG..BB..' ];
+    const WORK = [
+      [ '....HHH.', '...hHHHh', '....HHH.', '.....FF.', '.....EF.',
+        '.GGGGGG.', 'gGGGGGg.', 'GYY.BB..' ],
+      [ '....HHH.', '...hHHHh', '....HHH.', '.....FF.', '.....EF.',
+        '.GGGGGG.', 'gGGGGGg.', 'GYYY.B..' ],
+    ];
+    const MINE =
+      [ '..K..', '..D..', '.DrD.', 'DrRrD', 'DrRrD', '.DDD.' ];
+
+    // ── Layout ────────────────────────────────────────────
+    const GROUND    = H * 0.78;
+    const MINE_PW   = MINE[0].length * P;
+    const MINE_PH   = MINE.length    * P;
+    const SOL_PW    = WALK[0][0].length * P;
+    const MINE_XS   = [W * 0.22, W * 0.50, W * 0.78];
+
+    const defused = [false, false, false];
+    let flash = null;
+    let sol = {
+      x: -SOL_PW - 4, phase: 'walk', nextMine: 0,
+      walkFrame: 0, workFrame: 0,
+      timer: 0, walkT: 0, workT: 0,
+    };
+    let lastT = null, raf;
+    const SPEED = 0.07; // px per ms
+
+    const loop = (t) => {
+      if (lastT === null) lastT = t;
+      const dt = Math.min(t - lastT, 50);
+      lastT = t;
+
+      // ── Update ──────────────────────────────────────────
+      if (sol.phase === 'walk') {
+        sol.x   += SPEED * dt;
+        sol.walkT += dt;
+        if (sol.walkT > 160) { sol.walkFrame ^= 1; sol.walkT = 0; }
+
+        if (sol.x > W + SOL_PW) {
+          sol.x = -SOL_PW - 4; sol.nextMine = 0;
+          defused[0] = defused[1] = defused[2] = false;
+        } else if (sol.nextMine < MINE_XS.length) {
+          const stopX = MINE_XS[sol.nextMine] - MINE_PW / 2 - SOL_PW - P;
+          if (sol.x >= stopX) {
+            sol.x = stopX; sol.phase = 'pause'; sol.timer = 0;
+          }
+        }
+      } else if (sol.phase === 'pause') {
+        sol.timer += dt;
+        if (sol.timer > 300) { sol.phase = 'crouch'; sol.timer = 0; }
+      } else if (sol.phase === 'crouch') {
+        sol.timer += dt;
+        if (sol.timer > 400) { sol.phase = 'work'; sol.timer = 0; sol.workT = 0; }
+      } else if (sol.phase === 'work') {
+        sol.timer += dt; sol.workT += dt;
+        if (sol.workT > 220) { sol.workFrame ^= 1; sol.workT = 0; }
+        if (sol.timer > 1800) {
+          const mi = sol.nextMine;
+          defused[mi] = true;
+          flash = { x: MINE_XS[mi], t: 350 };
+          sol.nextMine++;
+          sol.phase = 'rise'; sol.timer = 0;
+        }
+      } else if (sol.phase === 'rise') {
+        sol.timer += dt;
+        if (sol.timer > 400) { sol.phase = 'walk'; sol.timer = 0; }
+      }
+      if (flash) { flash.t -= dt; if (flash.t <= 0) flash = null; }
+
+      // ── Render ──────────────────────────────────────────
+      ctx.clearRect(0, 0, W, H);
+
+      // faint ground line
+      ctx.fillStyle = 'rgba(74,104,37,0.12)';
+      ctx.fillRect(0, GROUND, W, 2);
+
+      // mines
+      MINE_XS.forEach((mx, i) => {
+        if (!defused[i]) draw(MINE, mx - MINE_PW / 2, GROUND - MINE_PH);
+      });
+
+      // defuse flash
+      if (flash) {
+        const a = flash.t / 350;
+        ctx.fillStyle = `rgba(245,208,0,${a * 0.65})`;
+        ctx.beginPath();
+        ctx.arc(flash.x, GROUND - MINE_PH / 2, 20, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // soldier
+      let sp;
+      if      (sol.phase === 'walk')   sp = WALK[sol.walkFrame];
+      else if (sol.phase === 'pause')  sp = STAND;
+      else if (sol.phase === 'crouch') sp = CROUCH;
+      else if (sol.phase === 'work')   sp = WORK[sol.workFrame];
+      else if (sol.phase === 'rise')   sp = STAND;
+      if (sp) draw(sp, sol.x, GROUND - sp.length * P);
+
+      raf = requestAnimationFrame(loop);
+    };
+
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
+  return (
+    <canvas ref={canvasRef} style={{
+      position: 'absolute', inset: 0, width: '100%', height: '100%',
+      pointerEvents: 'none', opacity: 0.3, imageRendering: 'pixelated',
+    }} />
+  );
+}
 
 function IntroScreen({ onStart, onArmory }) {
   const [armed, setArmed] = useS1(false);
@@ -8,13 +172,16 @@ function IntroScreen({ onStart, onArmory }) {
   return (
     <div style={{
       position: 'absolute', inset: 0, paddingTop: 'calc(env(safe-area-inset-top, 0px) + 16px)',
-      display: 'flex', flexDirection: 'column', alignItems: 'stretch',
+      display: 'flex', flexDirection: 'column', alignItems: 'stretch', isolation: 'isolate',
       background: `
         radial-gradient(ellipse 60% 40% at 50% 20%, rgba(245,208,0,0.06), transparent 70%),
         radial-gradient(ellipse 80% 50% at 50% 100%, rgba(255,58,45,0.08), transparent 70%),
         ${C.bg}
       `,
     }}>
+      {/* Background animation */}
+      <MineDefuserAnimation />
+
       {/* CRT scan lines */}
       <div style={{
         position: 'absolute', inset: 0, pointerEvents: 'none', opacity: 0.06,
